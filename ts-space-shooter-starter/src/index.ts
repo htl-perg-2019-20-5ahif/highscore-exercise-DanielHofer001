@@ -6,7 +6,7 @@ import { request } from 'http';
 
 /**
  * Space shooter scene
- * 
+ * https://wanago.io/2019/03/18/node-js-typescript-6-sending-http-requests-understanding-multipart-form-data/
  * Learn more about Phaser scenes at 
  * https://photonstorm.github.io/phaser3-docs/Phaser.Scenes.Systems.html.
  */
@@ -22,9 +22,9 @@ class ShooterScene extends Scene {
     private spaceKey: Input.Keyboard.Key;
     private isGameOver = false;
     private count = 0;
-    private host = 'http://localhost';
+    private host = 'localhost';
     private path = '/api/Highscores';
-    private port = 5000;
+    private port = '5000';
 
     preload() {
         // Preload images so that we can use them in our game
@@ -38,7 +38,7 @@ class ShooterScene extends Scene {
         if (this.isGameOver) {
             return;
         }
-      
+
         //  Add a background
         this.add.tileSprite(0, 0, this.game.canvas.width, this.game.canvas.height, 'space').setOrigin(0, 0);
 
@@ -66,9 +66,9 @@ class ShooterScene extends Scene {
         this.cursors = this.input.keyboard.createCursorKeys();
         this.input.keyboard.addCapture([' ']);
         this.spaceKey = this.input.keyboard.addKey(Input.Keyboard.KeyCodes.SPACE);
-        const score = this.add.text(30, 30, 'Score: '+this.count,
-        { font: "15px Arial", fill: "#ff0044", align: "center" });
-     
+        const score = this.add.text(30, 30, 'Score: ' + this.count,
+            { font: "15px Arial", fill: "#ff0044", align: "center" });
+
         score.setOrigin(0.5, 0.5);
         this.physics.add.collider(this.bullets, this.meteors, (bullet: Bullet, meteor: Meteor) => {
 
@@ -77,8 +77,8 @@ class ShooterScene extends Scene {
         }, (bullet: Bullet, meteor: Meteor) => {
             if (meteor.active) {
                 this.count++;
-                score.setText('Score: '+this.count)
-         
+                score.setText('Score: ' + this.count)
+
             }
             meteor.kill();
             bullet.kill();
@@ -88,7 +88,7 @@ class ShooterScene extends Scene {
 
         this.physics.add.collider(this.spaceShip, this.meteors, this.gameOver, null, this);
     }
-   
+
     update(_, delta: number) {
         // Move ship if cursor keys are pressed
         if (this.cursors.left.isDown) {
@@ -127,28 +127,36 @@ class ShooterScene extends Scene {
             }
         }
     }
-    sendPlayerScore() {
-        console.log('send score');
-
+    sendPlayerScore(ref) {
+        const user =  (document.getElementById("txt_name") as HTMLInputElement).value;
+        
         const req = request(
             {
-                host: this.host,
-                port: this.port,
-                path: this.path,
+                host: ref.host,
+                port: ref.port,
+                path: ref.path,
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json'
+                'Content-Type':'application/json'
                 }
             },
-            response => {
-                console.log(response.statusCode); // 200
-            }
-        );
 
+            response => {
+                response.on('data', d => {
+                    console.log("DATA", d);
+                });
+                req.on('error', error => {
+                    console.error('error', error)
+                });
+            }
+
+        );
+        console.log('User', user, ref.count);
         req.write(JSON.stringify({
-            User: document.getElementById("name"),
-            Score: this.count
+            'user': user,
+            'score': ref.count
         }));
+
 
         req.end();
     }
@@ -157,26 +165,49 @@ class ShooterScene extends Scene {
 
         this.bullets.getChildren().forEach((b: Bullet) => b.kill());
         this.meteors.getChildren().forEach((m: Meteor) => m.kill());
-        this.spaceShip.kill();
 
         // Display "game over" text
         const text = this.add.text(this.game.canvas.width / 2, this.game.canvas.height / 2, "Game Over :-(",
             { font: "65px Arial", fill: "#ff0044", align: "center" });
         text.setOrigin(0.5, 0.5);
-        document.getElementById("send").onclick = this.sendPlayerScore;
+        if (this.spaceShip.active) {
+            this.spaceShip.kill();
 
-        const getReq = request(
-            {
-                host: this.host,
-                path: this.path,
-                port: this.port,
-                method: 'GET',
-            },
-            response => {
-                console.log(response.statusCode); // 200
-            }
-        );
-        getReq.end();
+            document.getElementById("send").addEventListener("click", (e: Event) => this.sendPlayerScore(this));
+
+            const getReq = request(
+                {
+                    host: this.host,
+                    path: this.path,
+                    port: this.port,
+                    method: 'GET',
+                },
+                response => {
+                    console.log("GET", response.statusCode); // 200
+                    const chunks = [];
+                    response.on('data', (chunk) => {
+                        chunks.push(chunk);
+                    });
+                    response.on('end', () => {
+                        const data = Buffer.concat(chunks).toString();
+                        const result = {
+                            data: JSON.parse(data)
+                        };
+                        let highscore = "Result: " + "(length=" + result.data.length + ")<br>";
+                        highscore += "<table><tr><th>highScoreId</th> <th>score</th> <th>user</th></tr>";
+
+                        for (const element of result.data) {
+                            highscore += "<tr><td> " + element.highScoreId + "</td> <td>"
+                                + element.score + "</td><td> " + element.user + "</td></tr>";
+                        }
+                        highscore += "</table>";
+                        document.getElementById("highscores").innerHTML = highscore;
+                        console.log(result.data);
+                    });
+                }
+            );
+            getReq.end();
+        }
     }
 }
 

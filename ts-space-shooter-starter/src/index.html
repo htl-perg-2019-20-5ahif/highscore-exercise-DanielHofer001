@@ -4,13 +4,24 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Space Shooter</title>
+    <script src='https://www.google.com/recaptcha/api.js?render=6LfetuMUAAAAAPp9rrTR-L1MJTURMTUYErLqti7e'></script>
+    <script>
+grecaptcha.ready(function() {
+    grecaptcha.execute('_reCAPTCHA_site_key_', {action: 'homepage'}).then(function(token) {
+    
+    });
+});
+    </script>
 </head>
 <body>
-
+    <h1 style="position: absolute; right: 100px;">Highscores</h1>
+    <div id="highscores" style="position: absolute; right: 100px; top:100px;">test</div>
 </body>
 <footer style=" position: absolute;
 bottom: 10px;">
-    <input maxlength = "3" type="text" id="name" name="name">
+    <div class="g-recaptcha" data-sitekey="6LfetuMUAAAAAPp9rrTR-L1MJTURMTUYErLqti7e"></div>
+    <input maxlength="3" type="text" id="txt_name" name="name">
     <button id="send">Send my score</button>
+
 </footer>
 </html>
