@@ -1,27 +1,33 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Space Shooter</title>
-    <script src='https://www.google.com/recaptcha/api.js?render=6LfetuMUAAAAAPp9rrTR-L1MJTURMTUYErLqti7e'></script>
-    <script>
-grecaptcha.ready(function() {
-    grecaptcha.execute('_reCAPTCHA_site_key_', {action: 'homepage'}).then(function(token) {
-    
-    });
-});
-    </script>
+    <script src='https://www.google.com/recaptcha/api.js'></script>
+    <!--v3 not working
+        used v2
+    -->
 </head>
+
 <body>
     <h1 style="position: absolute; right: 100px;">Highscores</h1>
     <div id="highscores" style="position: absolute; right: 100px; top:100px;">test</div>
 </body>
 <footer style=" position: absolute;
 bottom: 10px;">
-    <div class="g-recaptcha" data-sitekey="6LfetuMUAAAAAPp9rrTR-L1MJTURMTUYErLqti7e"></div>
+    <input type="hidden" id="g-recaptcha-response" value="not_valid">
+    <div data-theme="dark" data-callback="getToken" id="captcha" class="g-recaptcha"
+        data-sitekey="6Le-wOMUAAAAAF9CA7jVSAY-wo0M7gxd5kW4GqQz"></div>
     <input maxlength="3" type="text" id="txt_name" name="name">
-    <button id="send">Send my score</button>
+    <button type="submit" id="send">Send my score</button>
 
+    <script>
+        function getToken() {
+            console.log("Okay" + grecaptcha.getResponse());
+        }
+    </script>
 </footer>
+
 </html>
