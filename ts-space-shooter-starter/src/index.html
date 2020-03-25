@@ -25,7 +25,7 @@ bottom: 10px;">
 
     <script>
         function getToken() {
-            console.log("Okay" + grecaptcha.getResponse());
+            document.getElementById("g-recaptcha-response").value = grecaptcha.getResponse();
         }
     </script>
 </footer>
