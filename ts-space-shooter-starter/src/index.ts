@@ -128,8 +128,7 @@ class ShooterScene extends Scene {
         }
     }
     sendPlayerScore(ref) {
-        const user =  (document.getElementById("txt_name") as HTMLInputElement).value;
-        
+        const user = (document.getElementById("txt_name") as HTMLInputElement).value;
         const req = request(
             {
                 host: ref.host,
@@ -137,7 +136,7 @@ class ShooterScene extends Scene {
                 path: ref.path,
                 method: 'POST',
                 headers: {
-                'Content-Type':'application/json'
+                    'Content-Type': 'application/json'
                 }
             },
 
@@ -151,15 +150,19 @@ class ShooterScene extends Scene {
             }
 
         );
+        // add token
         console.log('User', user, ref.count);
         req.write(JSON.stringify({
-            'user': user,
-            'score': ref.count
+            'highscore': {
+                'user': user,
+                'score': ref.count
+            },
+            'captcha':  (document.getElementById('g-recaptcha-response') as HTMLInputElement).value
         }));
-
 
         req.end();
     }
+
     gameOver() {
         this.isGameOver = true;
 
